@@ -335,6 +335,17 @@ function DetalhesEvento() {
         .header-scroll::-webkit-scrollbar { height: 0px; }
         .header-scroll { scrollbar-width: none; -ms-overflow-style: none; }
 
+        /* ===== ESTILO BASE (DESKTOP) DO HEADER =====
+           Antes essa div só ganhava "display: flex" dentro do media query mobile,
+           então no desktop ela virava um bloco comum e empilhava tudo.
+           Agora ela já nasce em flex-row, alinhada e espaçada corretamente. */
+        .header-scroll {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+        }
+
         /* ===== REGRAS DE RESPONSIVIDADE ===== */
         @media (max-width: 900px) {
           .header-conecta { padding: 14px 16px !important; }
@@ -342,6 +353,10 @@ function DetalhesEvento() {
             display: flex !important;
             flex-wrap: nowrap !important;
             align-items: center !important;
+            /* No mobile o carrossel usa scroll horizontal, então "flex-start" + gap
+               funciona melhor que "space-between" (que tentaria espalhar os itens
+               antes de deixar rolar). */
+            justify-content: flex-start !important;
             overflow-x: auto !important;
             -webkit-overflow-scrolling: touch;
             gap: 24px !important;

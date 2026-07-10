@@ -81,6 +81,17 @@ function Home() {
         .header-scroll::-webkit-scrollbar { height: 0px; }
         .header-scroll { scrollbar-width: none; -ms-overflow-style: none; }
 
+        /* ===== ESTILO BASE (DESKTOP) DO HEADER =====
+           Antes essa div só ganhava "display: flex" dentro do media query mobile,
+           então no desktop ela virava um bloco comum e empilhava tudo.
+           Agora ela já nasce em flex-row, alinhada e espaçada corretamente. */
+        .header-scroll {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+        }
+
         /* ===== MEDIA QUERIES PARA RESPONSIVIDADE ===== */
         @media (max-width: 900px) {
           .header-conecta { padding: 14px 16px !important; }
@@ -88,6 +99,10 @@ function Home() {
             display: flex !important;
             flex-wrap: nowrap !important;
             align-items: center !important;
+            /* No mobile o carrossel usa scroll horizontal, então "flex-start" + gap
+               funciona melhor que "space-between" (que tentaria espalhar os itens
+               antes de deixar rolar). */
+            justify-content: flex-start !important;
             overflow-x: auto !important;
             -webkit-overflow-scrolling: touch;
             gap: 24px !important;
@@ -353,7 +368,7 @@ const styles = {
     margin: "0 0 20px 0",
   },
   heroDestaque: { color: "#60a5fa" },
-  heroDescricao: { fontSize: "17px", color: "#cbd5e1", lineHeight: 1.6, maxWidth: "100%", margin: "0 auto 36px" }, // Alterado max-width para 100%
+  heroDescricao: { fontSize: "17px", color: "#cbd5e1", lineHeight: 1.6, maxWidth: "100%", margin: "0 auto 36px" },
   heroStats: { display: "flex", justifyContent: "center", alignItems: "center", gap: "28px" },
   heroStatItem: { display: "flex", flexDirection: "column", gap: "2px" },
   heroStatNumero: { fontFamily: "'Poppins', sans-serif", fontSize: "26px", fontWeight: 700, color: "#fff" },
@@ -369,7 +384,7 @@ const styles = {
   textoCarregando: { textAlign: "center", color: "#64748b" },
   textoVazio: { textAlign: "center", color: "#94a3b8", fontStyle: "italic" },
 
-  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "24px", width: "100%" }, // Reduzido minmax para caber melhor em telas pequenas
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "24px", width: "100%" },
   card: {
     backgroundColor: "#ffffff",
     border: "1px solid #e2e8f0",
@@ -445,7 +460,7 @@ const styles = {
     backgroundColor: "#0f1729",
   },
   footerTopo: { display: "flex", flexDirection: "column", gap: "14px", maxWidth: "1240px", margin: "0 auto" },
-  footerFrase: { color: "#64748b", fontSize: "13px", maxWidth: "100%" }, // Removido max-width de 360px fixo
+  footerFrase: { color: "#64748b", fontSize: "13px", maxWidth: "100%" },
   footerCopyright: {
     textAlign: "center",
     color: "#475569",
