@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Importações seguindo rigorosamente a sua estrutura de arquivos
-import Home from "./pages/Home";
+import Home from "./pages/home";
 import Login from "./pages/login";
 import Cadastrar from "./pages/cadastrar";
 import DashboardAdmin from "./pages/dashboardAdmin";
