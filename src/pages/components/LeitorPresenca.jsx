@@ -103,15 +103,23 @@ function LeitorPresenca() {
   );
 
   // Inicia a câmera
-  const iniciarLeitura = async () => {
-    if (modo === "MINICURSO" && !minicursoSelecionado) {
-      alert("Selecione o minicurso antes de iniciar a leitura.");
-      return;
-    }
+  // Inicia a câmera (apenas dispara o estado; o useEffect abaixo cuida de montar de fato)
+const iniciarLeitura = () => {
+  if (modo === "MINICURSO" && !minicursoSelecionado) {
+    alert("Selecione o minicurso antes de iniciar a leitura.");
+    return;
+  }
+  setMensagem("");
+  setEstado("LENDO");
+};
 
-    setEstado("LENDO");
-    setMensagem("");
+// Só tenta montar a câmera depois que o <div> já foi renderizado no DOM
+useEffect(() => {
+  if (estado !== "LENDO") return;
 
+  let cancelado = false;
+
+  const montarCamera = async () => {
     try {
       const instancia = new Html5Qrcode(ID_LEITOR_DOM);
       leitorRef.current = instancia;
@@ -129,10 +137,20 @@ function LeitorPresenca() {
         }
       );
     } catch (err) {
-      setEstado("ERRO");
-      setMensagem("Não foi possível acessar a câmera. Verifique as permissões do navegador.");
+      if (!cancelado) {
+        setEstado("ERRO");
+        setMensagem("Não foi possível acessar a câmera. Verifique as permissões do navegador.");
+      }
     }
   };
+
+  montarCamera();
+
+  return () => {
+    cancelado = true;
+  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [estado]);
 
   // Para a câmera com segurança
   const pararLeitura = useCallback(async () => {
