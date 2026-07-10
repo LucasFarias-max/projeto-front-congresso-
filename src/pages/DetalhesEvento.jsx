@@ -18,8 +18,7 @@ import {
   LogOut
 } from "lucide-react";
 
-
-  const transformarYoutubeEmbed = (url) => {
+const transformarYoutubeEmbed = (url) => {
   if (!url) return null;
 
   // Já é embed
@@ -42,6 +41,24 @@ import {
   if (!videoId) return null;
 
   return `https://www.youtube.com/embed/${videoId}`;
+};
+
+// Formata uma data ISO (ex: "2026-07-10T11:00:00.000Z") para o formato
+// brasileiro "10/07/2026, 08:00", removendo o "Z" e o formato cru do banco.
+const formatarData = (dataISO) => {
+  if (!dataISO) return "A definir";
+
+  const data = new Date(dataISO);
+
+  if (isNaN(data.getTime())) return "A definir";
+
+  return data.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 function DetalhesEvento() {
@@ -260,22 +277,18 @@ function DetalhesEvento() {
     }
   };
 
-  // Rola a página suavemente até o topo (usado por "Início")
   const irParaInicio = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Rola a página suavemente até a seção de Minicursos (usado por "Eventos")
   const irParaEventos = () => {
     eventosRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // Rola a página suavemente até o painel "Sobre o evento" (usado por "Sobre")
   const irParaSobre = () => {
     sobreRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // Rola a página suavemente até o rodapé (usado por "Contato")
   const irParaRodape = () => {
     rodapeRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   };
@@ -298,8 +311,6 @@ function DetalhesEvento() {
     );
   }
 
-
-
   const linkVideo = transformarYoutubeEmbed(evento.videoUrl);
 
   return (
@@ -307,6 +318,7 @@ function DetalhesEvento() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
         * { box-sizing: border-box; }
+        body { margin: 0; }
         .card-minicurso { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
         .card-minicurso:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(15, 23, 41, 0.08); border-color: #bfdbfe; }
         .btn-primario-detalhe:hover:not(:disabled) { background-color: #1d4ed8 !important; }
@@ -318,55 +330,94 @@ function DetalhesEvento() {
         html { scroll-behavior: smooth; }
         @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUpModal { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Barra de rolagem discreta para o header no mobile */
+        .header-scroll::-webkit-scrollbar { height: 0px; }
+        .header-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+        /* ===== REGRAS DE RESPONSIVIDADE ===== */
+        @media (max-width: 900px) {
+          .header-conecta { padding: 14px 16px !important; }
+          .header-scroll {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            gap: 24px !important;
+            width: 100%;
+          }
+          .header-scroll > * { flex-shrink: 0; }
+          .header-scroll .nav-conecta { gap: 20px !important; }
+          
+          .sub-header { padding: 12px 16px !important; flex-direction: column; gap: 10px; align-items: stretch !important; }
+          .sub-header button { justify-content: center; width: 100%; }
+
+          .hero-section { padding: 48px 16px 40px !important; }
+          .hero-titulo { fontSize: 26px !important; margin-bottom: 24px !important; }
+          .hero-meta { grid-template-columns: 1fr !important; gap: 16px !important; }
+
+          .main-conteudo { padding: 32px 16px 60px !important; }
+          .bloco-duas-colunas { grid-template-columns: 1fr !important; gap: 20px !important; margin-bottom: 32px !important; }
+          
+          .faixa-inscricao { padding: 20px 16px !important; text-align: center; justify-content: center !important; }
+          .faixa-inscricao button, .faixa-inscricao div { width: 100% !important; justify-content: center !important; }
+
+          .grid-minicursos { grid-template-columns: 1fr !important; }
+
+          .footer-section { padding: 40px 16px 24px !important; }
+        }
       `}</style>
 
-      {/* MENU SUPERIOR (idêntico ao da Home) */}
-      <header style={styles.headerTopo}>
-        <div style={styles.logoBox}>
-          <div style={styles.logoIcone}>◆</div>
-          <div>
-            <div style={styles.logoTexto}>CONECTA</div>
-            <div style={styles.logoSubtexto}>EVENTOS</div>
+      {/* MENU SUPERIOR */}
+      <header style={styles.headerTopo} className="header-conecta">
+        <div className="header-scroll">
+          <div style={styles.logoBox}>
+            <div style={styles.logoIcone}>◆</div>
+            <div>
+              <div style={styles.logoTexto}>CONECTA</div>
+              <div style={styles.logoSubtexto}>EVENTOS</div>
+            </div>
           </div>
-        </div>
 
-        <nav style={styles.nav}>
-          <span className="nav-link" style={styles.navLink} onClick={irParaInicio}>Início</span>
-          <span className="nav-link" style={styles.navLink} onClick={irParaEventos}>Eventos</span>
-          <span className="nav-link" style={styles.navLink} onClick={irParaSobre}>Sobre</span>
-          <span className="nav-link" style={styles.navLink} onClick={irParaRodape}>Contato</span>
-        </nav>
+          <nav style={styles.nav} className="nav-conecta">
+            <span className="nav-link" style={styles.navLink} onClick={irParaInicio}>Início</span>
+            <span className="nav-link" style={styles.navLink} onClick={irParaEventos}>Eventos</span>
+            <span className="nav-link" style={styles.navLink} onClick={irParaSobre}>Sobre</span>
+            <span className="nav-link" style={styles.navLink} onClick={irParaRodape}>Contato</span>
+          </nav>
 
-        <div style={styles.headerAcoes}>
-          {token ? (
-            <>
-              <Link
-                to={`/dashboard-${userRole?.toLowerCase()}`}
-                style={styles.linkPainel}
-              >
-                Meu Painel ({userRole})
-              </Link>
-              <button
-                onClick={() => { localStorage.clear(); window.location.reload(); }}
-                style={styles.botaoSair}
-              >
-                <LogOut size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-                Sair
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" style={styles.botaoEntrar} className="btn-ghost-detalhe">Entrar</Link>
-              <Link to="/cadastrar" style={styles.botaoCriarConta} className="btn-primario-detalhe">
-                Criar conta
-              </Link>
-            </>
-          )}
+          <div style={styles.headerAcoes}>
+            {token ? (
+              <>
+                <Link
+                  to={`/dashboard-${userRole?.toLowerCase()}`}
+                  style={styles.linkPainel}
+                >
+                  Meu Painel ({userRole})
+                </Link>
+                <button
+                  onClick={() => { localStorage.clear(); window.location.reload(); }}
+                  style={styles.botaoSair}
+                >
+                  <LogOut size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                  Sair
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" style={styles.botaoEntrar} className="btn-ghost-detalhe">Entrar</Link>
+                <Link to="/cadastrar" style={styles.botaoCriarConta} className="btn-primario-detalhe">
+                  Criar conta
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* SUB-HEADER: Voltar / Ir para o Painel (ações específicas desta página) */}
-      <div style={styles.subHeader}>
+      {/* SUB-HEADER */}
+      <div style={styles.subHeader} className="sub-header">
         <button onClick={() => navigate(-1)} style={styles.botaoVoltar} className="btn-ghost-detalhe">
           <ArrowLeft size={14} style={{ marginRight: '6px' }} /> Voltar
         </button>
@@ -382,12 +433,12 @@ function DetalhesEvento() {
       </div>
 
       {/* HERO NAVY DO EVENTO */}
-      <section style={styles.hero}>
+      <section style={styles.hero} className="hero-section">
         <div style={styles.heroConteudo}>
           <span style={styles.heroBadge}>EVENTO PRESENCIAL</span>
-          <h1 style={styles.heroTitulo}>{evento.nome}</h1>
+          <h1 style={styles.heroTitulo} className="hero-titulo">{evento.nome}</h1>
 
-          <div style={styles.heroMetaGrid}>
+          <div style={styles.heroMetaGrid} className="hero-meta">
             <div style={styles.heroMetaItem}>
               <span style={styles.heroMetaIcone}><MapPin size={16} color="#93c5fd" /></span>
               <div>
@@ -399,7 +450,7 @@ function DetalhesEvento() {
               <span style={styles.heroMetaIcone}><Calendar size={16} color="#93c5fd" /></span>
               <div>
                 <div style={styles.heroMetaLabel}>Data de início</div>
-                <div style={styles.heroMetaValor}>{evento.dataInicio}</div>
+                <div style={styles.heroMetaValor}>{formatarData(evento.dataInicio)}</div>
               </div>
             </div>
             <div style={styles.heroMetaItem}>
@@ -413,11 +464,11 @@ function DetalhesEvento() {
         </div>
       </section>
 
-      <main style={styles.conteudo}>
+      <main style={styles.conteudo} className="main-conteudo">
         {erro && <div style={styles.erroBox}>{erro}</div>}
 
         {/* SOBRE O EVENTO + VÍDEO DE APRESENTAÇÃO */}
-        <div style={styles.duasColunas} ref={sobreRef}>
+        <div style={styles.duasColunas} ref={sobreRef} className="bloco-duas-colunas">
           <div style={styles.painelSobre}>
             <h3 style={styles.painelTitulo}>
               <FileText size={18} color="#2563eb" /> Sobre o evento
@@ -450,7 +501,7 @@ function DetalhesEvento() {
         </div>
 
         {/* BLOCO DE INSCRIÇÃO PRINCIPAL */}
-        <div style={styles.faixaInscricao}>
+        <div style={styles.faixaInscricao} className="faixa-inscricao">
           <div>
             <h3 style={styles.faixaInscricaoTitulo}>
               {inscricaoPrincipal ? "Sua vaga está garantida!" : "Garanta sua participação"}
@@ -496,7 +547,7 @@ function DetalhesEvento() {
           {minicursos.length === 0 ? (
             <p style={styles.vazio}>Este evento não possui minicursos cadastrados.</p>
           ) : (
-            <div style={styles.grid}>
+            <div style={styles.grid} className="grid-minicursos">
               {minicursos.map((curso) => {
                 const jaInscritoNoCurso = meusMinicursosIds.includes(curso.id);
 
@@ -548,8 +599,8 @@ function DetalhesEvento() {
         </section>
       </main>
 
-      {/* RODAPÉ (idêntico ao da Home) */}
-      <footer style={styles.footer} ref={rodapeRef}>
+      {/* RODAPÉ */}
+      <footer style={styles.footer} ref={rodapeRef} className="footer-section">
         <div style={styles.footerTopo}>
           <div style={styles.logoBox}>
             <div style={styles.logoIcone}>◆</div>
@@ -622,7 +673,7 @@ const styles = {
     minHeight: "100vh",
   },
 
-  // MENU SUPERIOR (mesmo estilo visual da Home)
+  // MENU SUPERIOR
   headerTopo: {
     display: "flex",
     justifyContent: "space-between",
@@ -657,7 +708,7 @@ const styles = {
   botaoEntrar: { padding: "9px 18px", backgroundColor: "transparent", color: "#0f172a", border: "1px solid #e2e8f0", borderRadius: "8px", fontSize: "14px", fontWeight: 600, textDecoration: "none" },
   botaoCriarConta: { padding: "9px 18px", backgroundColor: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, textDecoration: "none" },
 
-  // SUB-HEADER (Voltar / Ir para Meu Painel)
+  // SUB-HEADER
   subHeader: {
     display: "flex", justifyContent: "space-between", alignItems: "center",
     padding: "16px 48px", borderBottom: "1px solid #e2e8f0", backgroundColor: "#ffffff",
@@ -697,7 +748,7 @@ const styles = {
   heroMetaLabel: { fontSize: "12px", color: "#94a3b8", marginBottom: "2px" },
   heroMetaValor: { fontSize: "14px", color: "#f1f5f9", fontWeight: 600 },
 
-  conteudo: { padding: "48px 48px 80px", maxWidth: "1100px", margin: "0 auto" },
+  conteudo: { padding: "48px 48px 80px", maxWidth: "1100px", margin: "0 auto", width: "100%" },
 
   erroBox: {
     backgroundColor: "rgba(239, 68, 68, 0.08)", border: "1px solid #fecaca", color: "#dc2626",
@@ -751,9 +802,9 @@ const styles = {
   tituloSecaoBox: { marginBottom: "32px" },
   eyebrow: { display: "block", fontSize: "13px", fontWeight: 700, color: "#2563eb", marginBottom: "8px" },
   tituloSecao: { fontFamily: "'Poppins', sans-serif", fontSize: "26px", fontWeight: 700, margin: "0 0 8px 0", color: "#0f172a" },
-  subtituloSecao: { fontSize: "14px", color: "#64748b", margin: 0, maxWidth: "560px" },
+  subtituloSecao: { fontSize: "14px", color: "#64748b", margin: 0, maxWidth: "100%" },
 
-  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px", width: "100%" },
   card: {
     backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "22px",
     textAlign: "left", display: "flex", flexDirection: "column", gap: "10px",
@@ -812,14 +863,14 @@ const styles = {
     border: "none", borderRadius: "10px", cursor: "pointer", fontWeight: 600, fontSize: "14px",
   },
 
-  // RODAPÉ (mesmo estilo visual da Home)
+  // RODAPÉ
   footer: {
     marginTop: "56px",
     padding: "48px 48px 24px",
     backgroundColor: "#0f1729",
   },
   footerTopo: { display: "flex", flexDirection: "column", gap: "14px", maxWidth: "1240px", margin: "0 auto" },
-  footerFrase: { color: "#64748b", fontSize: "13px", maxWidth: "360px" },
+  footerFrase: { color: "#64748b", fontSize: "13px", maxWidth: "100%" },
   footerCopyright: {
     textAlign: "center",
     color: "#475569",

@@ -115,7 +115,7 @@ function DashboardParticipante() {
 
   return (
     <div style={styles.page}>
-      {/* Fontes globais + Regras de Animação idênticas à Home */}
+      {/* Fontes globais + Regras de Animação e Responsividade */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
         * { box-sizing: border-box; }
@@ -126,10 +126,31 @@ function DashboardParticipante() {
         .btn-ghost:hover { background-color: #f1f5f9 !important; }
         .btn-success:hover { background-color: #059669 !important; }
         .btn-gold:hover { background-color: #ca8a04 !important; }
+
+        /* Barra de rolagem discreta para o header no mobile se necessário */
+        .header-scroll::-webkit-scrollbar { height: 0px; }
+        .header-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+        /* ===== REGRAS DE RESPONSIVIDADE ===== */
+        @media (max-width: 900px) {
+          .header-dash { padding: 14px 16px !important; flex-direction: column; gap: 14px; align-items: stretch !important; }
+          .header-acoes-dash { justify-content: space-between; width: 100%; gap: 10px; }
+          .header-acoes-dash button { flex: 1; justify-content: center; padding: 10px !important; font-size: 13px !important; }
+          
+          .hero-dash { padding: 48px 16px 48px !important; }
+          .hero-titulo-dash { font-size: 28px !important; }
+          .hero-desc-dash { font-size: 14px !important; }
+
+          .main-dash { padding: 32px 16px 40px !important; }
+          .grid-dash { grid-template-columns: 1fr !important; gap: 16px !important; }
+          .secao-dash { marginBottom: 40px !important; }
+          
+          .footer-dash { padding: 40px 16px 24px !important; marginTop: 48px !important; }
+        }
       `}</style>
 
       {/* HEADER INTEGRADO */}
-      <header style={styles.header}>
+      <header style={styles.header} className="header-dash">
         <div style={styles.logoBox}>
           <div style={styles.logoIcone}>◆</div>
           <div>
@@ -138,7 +159,7 @@ function DashboardParticipante() {
           </div>
         </div>
 
-        <div style={styles.headerAcoes}>
+        <div style={styles.headerAcoes} className="header-acoes-dash">
           <button onClick={() => navigate("/")} style={styles.botaoHome} className="btn-ghost">
             <ArrowLeft size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
             Ver Novos Eventos
@@ -151,27 +172,27 @@ function DashboardParticipante() {
       </header>
 
       {/* HERO DO PAINEL */}
-      <section style={styles.hero}>
+      <section style={styles.hero} className="hero-dash">
         <div style={styles.heroConteudo}>
           <span style={styles.heroBadge}>ÁREA DO PARTICIPANTE</span>
-          <h1 style={styles.heroTitulo}>
+          <h1 style={styles.heroTitulo} className="hero-titulo-dash">
             Olá, <span style={styles.heroDestaque}>{nomeUsuario}</span>! 🎓
           </h1>
-          <p style={styles.heroDescricao}>
+          <p style={styles.heroDescricao} className="hero-desc-dash">
             Gerencie suas inscrições, acesse seus comprovantes digitais com QR Code e emita seus certificados de conclusão.
           </p>
         </div>
       </section>
 
       {/* CONTEÚDO PRINCIPAL DO DASHBOARD */}
-      <main style={styles.conteudoPrincipal}>
+      <main style={styles.conteudoPrincipal} className="main-dash">
         {erro && <div style={styles.erroBox}>{erro}</div>}
         {carregando && <p style={styles.textoCarregando}>Carregando sua programação...</p>}
 
         {!carregando && (
           <>
             {/* SEÇÃO 1: SEUS CONGRESSOS / EVENTOS */}
-            <section style={styles.secao}>
+            <section style={styles.secao} className="secao-dash">
               <div style={styles.tituloSecaoBox}>
                 <span style={styles.eyebrow}>
                   <Calendar size={14} style={{ display: 'inline', marginRight: '6px', marginBottom: '-2px' }} /> 
@@ -183,7 +204,7 @@ function DashboardParticipante() {
               {inscricoesEventos.length === 0 ? (
                 <p style={styles.textoVazio}>Você não está inscrito em nenhum evento principal ainda.</p>
               ) : (
-                <div style={styles.grid}>
+                <div style={styles.grid} className="grid-dash">
                   {inscricoesEventos.map((item) => (
                     <div key={item.id} className="dashboard-card" style={styles.card}>
                       <div style={styles.cardTopo}>
@@ -231,7 +252,7 @@ function DashboardParticipante() {
             </section>
 
             {/* SEÇÃO 2: SEUS MINICURSOS */}
-            <section style={styles.secao}>
+            <section style={styles.secao} className="secao-dash">
               <div style={styles.tituloSecaoBox}>
                 <span style={styles.eyebrow}>
                   <Sparkles size={14} style={{ display: 'inline', marginRight: '6px', marginBottom: '-2px' }} /> 
@@ -243,7 +264,7 @@ function DashboardParticipante() {
               {inscricoesMinicursos.length === 0 ? (
                 <p style={styles.textoVazio}>Você ainda não garantiu vaga em nenhum minicurso.</p>
               ) : (
-                <div style={styles.grid}>
+                <div style={styles.grid} className="grid-dash">
                   {inscricoesMinicursos.map((item) => {
                     const idDoEvento = item.minicurso?.eventoId || item.inscricao?.eventoId;
 
@@ -284,7 +305,7 @@ function DashboardParticipante() {
       </main>
 
       {/* FOOTER COERENTE */}
-      <footer style={styles.footer}>
+      <footer style={styles.footer} className="footer-dash">
         <div style={styles.footerTopo}>
           <div style={styles.logoBox}>
             <div style={styles.logoIcone}>◆</div>
@@ -371,7 +392,7 @@ const styles = {
   heroDescricao: { fontSize: "15px", color: "#cbd5e1", lineHeight: 1.6, maxWidth: "580px", margin: "0 auto" },
 
   // SEÇÕES DE CONTEÚDO
-  conteudoPrincipal: { padding: "60px 48px 40px", maxWidth: "1240px", margin: "0 auto" },
+  conteudoPrincipal: { padding: "60px 48px 40px", maxWidth: "1240px", margin: "0 auto", width: "100%" },
   secao: { marginBottom: "56px" },
   tituloSecaoBox: { textAlign: "left", marginBottom: "28px" },
   eyebrow: { display: "block", fontSize: "12px", fontWeight: 700, color: "#2563eb", letterSpacing: "0.5px", marginBottom: "4px" },
@@ -392,7 +413,7 @@ const styles = {
     gap: "14px",
     position: "relative"
   },
-  cardTopo: { display: "flex", justifyContent: "space-between", alignItems: "center" },
+  cardTopo: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px" },
   cardIcone: {
     width: "44px",
     height: "44px",
@@ -418,6 +439,7 @@ const styles = {
     backgroundColor: "#ecfdf5",
     padding: "5px 12px",
     borderRadius: "999px",
+    whiteSpace: "nowrap"
   },
   cardTitulo: { fontFamily: "'Poppins', sans-serif", fontSize: "18px", fontWeight: 600, margin: 0, color: "#0f172a", lineHeight: 1.4 },
   cardMetaGrid: { display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" },

@@ -1,7 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { api } from "../services/api";
-
 // Importando os ícones modernos
 import { 
   Calendar, 
@@ -13,6 +11,8 @@ import {
   Sparkles,
   ArrowRight
 } from "lucide-react";
+// 🔗 Importa o serviço de API — ele já decide sozinho se usa localhost ou o backend do Render
+import { api } from "../services/api";
 
 function Home() {
   const [eventos, setEventos] = useState([]);
@@ -28,42 +28,42 @@ function Home() {
   const rodapeRef = useRef(null);
 
   useEffect(() => {
-  async function carregarEventos() {
-    try {
-      const eventos = await api.get("/eventos");
-      setEventos(eventos);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setCarregando(false);
-    }
-  }
-
-  carregarEventos();
-}, []);
+    api.get("/eventos")
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setEventos(data);
+        } else {
+          console.error("O backend não devolveu uma lista de eventos válida:", data);
+          setEventos([]);
+        }
+        setCarregando(false);
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar eventos:", err);
+        setEventos([]);
+        setCarregando(false);
+      });
+  }, []);
 
   const handleInscricao = (eventoId) => {
     navigate(`/eventos/${eventoId}`);
   };
 
-  // Rola a página suavemente até o topo (usado por "Início")
   const irParaInicio = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Rola a página suavemente até a seção de eventos (usado por "Eventos")
   const irParaEventos = () => {
     eventosRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // Rola a página suavemente até o rodapé (usado por "Sobre" e "Contato")
   const irParaRodape = () => {
     rodapeRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   };
 
   return (
     <div style={styles.page} ref={topoRef}>
-      {/* Fontes + pequenas animações */}
+      {/* Fontes + Animações + REGRAS DE RESPONSIVIDADE */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
         * { box-sizing: border-box; }
@@ -76,63 +76,105 @@ function Home() {
         .nav-link::after { content: ""; position: absolute; left: 0; bottom: -4px; width: 0; height: 2px; background: #2563eb; transition: width 0.2s ease; }
         .nav-link:hover::after { width: 100%; }
         html { scroll-behavior: smooth; }
+
+        /* Barra de rolagem discreta para o header no mobile */
+        .header-scroll::-webkit-scrollbar { height: 0px; }
+        .header-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+        /* ===== MEDIA QUERIES PARA RESPONSIVIDADE ===== */
+        @media (max-width: 900px) {
+          .header-conecta { padding: 14px 16px !important; }
+          .header-scroll {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            gap: 24px !important;
+            width: 100%;
+          }
+          .header-scroll > * { flex-shrink: 0; }
+          .header-scroll .nav-conecta { gap: 20px !important; }
+          
+          /* Hero Responsivo */
+          .hero-section { padding: 60px 20px 70px !important; }
+          .hero-titulo { fontSize: 32px !important; }
+          
+          /* Conteúdo Principal (Grid) */
+          .main-conteudo { padding: 48px 20px 40px !important; }
+          .grid-eventos { grid-template-columns: 1fr !important; }
+          .card-meta { grid-template-columns: 1fr !important; gap: 8px !important; }
+          
+          /* Faixa Final Responsiva */
+          .faixa-final { 
+            margin: 30px 20px 0 !important; 
+            padding: 24px !important;
+            flex-direction: column !important;
+            text-align: center !important;
+          }
+          
+          /* Footer Responsivo */
+          .footer-section { padding: 40px 20px 24px !important; }
+        }
       `}</style>
 
       {/* HEADER */}
-      <header style={styles.header}>
-        <div style={styles.logoBox}>
-          <div style={styles.logoIcone}>◆</div>
-          <div>
-            <div style={styles.logoTexto}>CONECTA</div>
-            <div style={styles.logoSubtexto}>EVENTOS</div>
+      <header style={styles.header} className="header-conecta">
+        <div className="header-scroll">
+          <div style={styles.logoBox}>
+            <div style={styles.logoIcone}>◆</div>
+            <div>
+              <div style={styles.logoTexto}>CONECTA</div>
+              <div style={styles.logoSubtexto}>EVENTOS</div>
+            </div>
           </div>
-        </div>
 
-        <nav style={styles.nav}>
-          <span className="nav-link" style={styles.navLink} onClick={irParaInicio}>Início</span>
-          <span className="nav-link" style={styles.navLink} onClick={irParaEventos}>Eventos</span>
-          <span className="nav-link" style={styles.navLink} onClick={irParaRodape}>Sobre</span>
-          <span className="nav-link" style={styles.navLink} onClick={irParaRodape}>Contato</span>
-        </nav>
+          <nav style={styles.nav} className="nav-conecta">
+            <span className="nav-link" style={styles.navLink} onClick={irParaInicio}>Início</span>
+            <span className="nav-link" style={styles.navLink} onClick={irParaEventos}>Eventos</span>
+            <span className="nav-link" style={styles.navLink} onClick={irParaRodape}>Sobre</span>
+            <span className="nav-link" style={styles.navLink} onClick={irParaRodape}>Contato</span>
+          </nav>
 
-        <div style={styles.headerAcoes}>
-          {token ? (
-            <>
-              <Link
-                to={`/dashboard-${userRole?.toLowerCase()}`}
-                style={styles.linkPainel}
-              >
-                Meu Painel ({userRole})
-              </Link>
-              <button
-                onClick={() => { localStorage.clear(); window.location.reload(); }}
-                style={styles.botaoSair}
-              >
-                <LogOut size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-                Sair
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" style={styles.botaoEntrar} className="btn-ghost">Entrar</Link>
-              <Link to="/cadastrar" style={styles.botaoCriarConta} className="btn-primario">
-                Criar conta
-              </Link>
-            </>
-          )}
+          <div style={styles.headerAcoes}>
+            {token ? (
+              <>
+                <Link
+                  to={`/dashboard-${userRole?.toLowerCase()}`}
+                  style={styles.linkPainel}
+                >
+                  Meu Painel ({userRole})
+                </Link>
+                <button
+                  onClick={() => { localStorage.clear(); window.location.reload(); }}
+                  style={styles.botaoSair}
+                >
+                  <LogOut size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+                  Sair
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" style={styles.botaoEntrar} className="btn-ghost">Entrar</Link>
+                <Link to="/cadastrar" style={styles.botaoCriarConta} className="btn-primario">
+                  Criar conta
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
       {/* HERO */}
-      <section style={styles.hero}>
+      <section style={styles.hero} className="hero-section">
         <div style={styles.heroConteudo}>
           <span style={styles.heroBadge}>EVENTOS DISPONÍVEIS</span>
-          <h1 style={styles.heroTitulo}>
+          <h1 style={styles.heroTitulo} className="hero-titulo">
             Conecte-se ao que há de <span style={styles.heroDestaque}>mais atual</span> em tecnologia
           </h1>
           <p style={styles.heroDescricao}>
             Explore congressos, workshops e minicursos pensados para quem quer aprender,
-            fazer networking e sair na frente. Garanta sua vaga em poucos cliques.
+            fazendo networking. Garanta sua vaga em poucos cliques.
           </p>
           <div style={styles.heroStats}>
             <div style={styles.heroStatItem}>
@@ -149,7 +191,7 @@ function Home() {
       </section>
 
       {/* SEÇÃO DE EVENTOS */}
-      <main style={styles.conteudoPrincipal} ref={eventosRef}>
+      <main style={styles.conteudoPrincipal} ref={eventosRef} className="main-conteudo">
         <div style={styles.tituloSecaoBox}>
           <span style={styles.eyebrow}>
             <Calendar size={14} style={{ display: 'inline', marginRight: '6px', marginBottom: '-2px' }} /> 
@@ -164,7 +206,7 @@ function Home() {
           <p style={styles.textoVazio}>Nenhum evento cadastrado no momento.</p>
         )}
 
-        <div style={styles.grid}>
+        <div style={styles.grid} className="grid-eventos">
           {eventos.map((evento) => (
             <div key={evento.id} className="evento-card" style={styles.card}>
               <div style={styles.cardTopo}>
@@ -177,7 +219,7 @@ function Home() {
               <h3 style={styles.cardTitulo}>{evento.nome || evento.titulo}</h3>
               <p style={styles.cardDescricao}>{evento.descricao}</p>
 
-              <div style={styles.cardMetaGrid}>
+              <div style={styles.cardMetaGrid} className="card-meta">
                 <div style={styles.cardMetaItem}>
                   <MapPin size={14} color="#64748b" />
                   <span>{evento.local}</span>
@@ -211,7 +253,7 @@ function Home() {
       </main>
 
       {/* FAIXA DE CHAMADA FINAL */}
-      <section style={styles.faixaFinal}>
+      <section style={styles.faixaFinal} className="faixa-final">
         <div style={styles.faixaFinalIconeBox}>
           <Sparkles size={22} color="#60a5fa" />
         </div>
@@ -222,7 +264,7 @@ function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer style={styles.footer} ref={rodapeRef}>
+      <footer style={styles.footer} ref={rodapeRef} className="footer-section">
         <div style={styles.footerTopo}>
           <div style={styles.logoBox}>
             <div style={styles.logoIcone}>◆</div>
@@ -239,6 +281,7 @@ function Home() {
   );
 }
 
+// Pequenas modificações no objeto de estilos para remover valores fixos prejudiciais
 const styles = {
   page: {
     fontFamily: "'Inter', sans-serif",
@@ -310,7 +353,7 @@ const styles = {
     margin: "0 0 20px 0",
   },
   heroDestaque: { color: "#60a5fa" },
-  heroDescricao: { fontSize: "17px", color: "#cbd5e1", lineHeight: 1.6, maxWidth: "580px", margin: "0 auto 36px" },
+  heroDescricao: { fontSize: "17px", color: "#cbd5e1", lineHeight: 1.6, maxWidth: "100%", margin: "0 auto 36px" }, // Alterado max-width para 100%
   heroStats: { display: "flex", justifyContent: "center", alignItems: "center", gap: "28px" },
   heroStatItem: { display: "flex", flexDirection: "column", gap: "2px" },
   heroStatNumero: { fontFamily: "'Poppins', sans-serif", fontSize: "26px", fontWeight: 700, color: "#fff" },
@@ -318,7 +361,7 @@ const styles = {
   heroStatDivisor: { width: "1px", height: "36px", backgroundColor: "rgba(255,255,255,0.15)" },
 
   // SEÇÃO DE EVENTOS
-  conteudoPrincipal: { padding: "72px 48px 40px", maxWidth: "1240px", margin: "0 auto" },
+  conteudoPrincipal: { padding: "72px 48px 40px", maxWidth: "1240px", margin: "0 auto", width: "100%" },
   tituloSecaoBox: { textAlign: "center", marginBottom: "48px" },
   eyebrow: { display: "block", fontSize: "13px", fontWeight: 700, color: "#2563eb", marginBottom: "8px" },
   tituloSecao: { fontFamily: "'Poppins', sans-serif", fontSize: "32px", fontWeight: 700, margin: "0 0 8px 0", color: "#0f172a" },
@@ -326,7 +369,7 @@ const styles = {
   textoCarregando: { textAlign: "center", color: "#64748b" },
   textoVazio: { textAlign: "center", color: "#94a3b8", fontStyle: "italic" },
 
-  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "24px" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "24px", width: "100%" }, // Reduzido minmax para caber melhor em telas pequenas
   card: {
     backgroundColor: "#ffffff",
     border: "1px solid #e2e8f0",
@@ -402,7 +445,7 @@ const styles = {
     backgroundColor: "#0f1729",
   },
   footerTopo: { display: "flex", flexDirection: "column", gap: "14px", maxWidth: "1240px", margin: "0 auto" },
-  footerFrase: { color: "#64748b", fontSize: "13px", maxWidth: "360px" },
+  footerFrase: { color: "#64748b", fontSize: "13px", maxWidth: "100%" }, // Removido max-width de 360px fixo
   footerCopyright: {
     textAlign: "center",
     color: "#475569",
