@@ -1,0 +1,37 @@
+/* ============================================
+   RESET GLOBAL — remove as travas do template padrão do Vite
+   ============================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff; /* 👈 substitui o #242424 escuro do template */
+}
+
+body {
+  display: block;       /* 👈 remove o "display:flex; place-items:center" que encolhia o #root */
+  min-width: 320px;
+}
+
+#root {
+  max-width: none;       /* 👈 remove o limite de 1280px */
+  text-align: left;      /* 👈 remove o "text-align:center" herdado, que bagunça layouts com flex/grid */
+}
+
+a {
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #1d4ed8;
+}
