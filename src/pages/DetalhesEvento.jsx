@@ -643,7 +643,7 @@ function DetalhesEvento() {
             </h3>
             <p style={styles.modalTexto}>
               {modalConfirmacao.tipo === "evento"
-                ? `Você está prestes a garantir sua vaga em "${evento.nome}". Deseja continuar?`
+                ? `Você está prestes a garantir sua vaga em "${evento.titulo}". Deseja continuar?`
                 : "Você vai reservar sua vaga neste minicurso. Essa ação não pode ser desfeita pelo app."}
             </p>
 
