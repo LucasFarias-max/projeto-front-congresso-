@@ -27,6 +27,7 @@ function DashboardAdmin() {
   const [presencas, setPresencas] = useState([]);
   const [colaboradores, setColaboradores] = useState([]);
   const [usuariosSistema, setUsuariosSistema] = useState([]);
+  const [inscricoesPorEvento, setInscricoesPorEvento] = useState({});
 
   // Estados de Formulários e Edição
   const [carregando, setCarregando] = useState(true);
@@ -61,6 +62,10 @@ function DashboardAdmin() {
 
       const resUsuarios = await fetch("https://projeto-congresso.onrender.com/usuario/detalhes", { headers });
       if (resUsuarios.ok) setUsuariosSistema(await resUsuarios.json());
+
+      // 🎯 Contagem de inscrições por evento
+      const resContagemEvento = await fetch("https://projeto-congresso.onrender.com/inscricao/contagem", { headers });
+      if (resContagemEvento.ok) setInscricoesPorEvento(await resContagemEvento.json());
 
     } catch (err) {
       console.error("Erro ao sincronizar dados do painel:", err);
@@ -187,17 +192,33 @@ function DashboardAdmin() {
     }
   };
 
+  // 🎯 CORREÇÃO: Remove presenças duplicadas (mesmo participante lido várias vezes pelo QR)
+  // Mantém sempre a primeira ocorrência; chave inclui minicursoId pra não misturar minicursos diferentes
+  const removerDuplicadas = (lista) => {
+    const vistos = new Set();
+    return lista.filter(p => {
+      const chave = `${p.inscricaoId}-${p.minicursoId || "evento"}`;
+      if (vistos.has(chave)) return false;
+      vistos.add(chave);
+      return true;
+    });
+  };
+
   const eventoSelecionadoId = parseInt(formMinicurso.filtroEventoId, 10);
 
-  const listaPresencaEvento = presencas.filter(p => {
-    if (p.tipo !== "EVENTO") return false;
-    return (p.eventoId || p.inscricao?.eventoId) === eventoSelecionadoId;
-  });
+  const listaPresencaEvento = removerDuplicadas(
+    presencas.filter(p => {
+      if (p.tipo !== "EVENTO") return false;
+      return (p.eventoId || p.inscricao?.eventoId) === eventoSelecionadoId;
+    })
+  );
 
-  const listaPresencaMinicurso = presencas.filter(p => {
-    if (p.tipo !== "MINICURSO") return false;
-    return (p.minicurso?.eventoId || p.inscricao?.minicurso?.eventoId) === eventoSelecionadoId;
-  });
+  const listaPresencaMinicurso = removerDuplicadas(
+    presencas.filter(p => {
+      if (p.tipo !== "MINICURSO") return false;
+      return (p.minicurso?.eventoId || p.inscricao?.minicurso?.eventoId) === eventoSelecionadoId;
+    })
+  );
 
   const colaboradoresDoEvento = colaboradores.filter(
     c => Number(c.eventoId) === Number(eventoSelecionadoId)
@@ -319,6 +340,7 @@ function DashboardAdmin() {
                   <div style={styles.cardMeta}>
                     <span>📍 {ev.local}</span>
                     <span>⏱️ {ev.cargaHorariaTotal}h</span>
+                    <span>👥 {inscricoesPorEvento[ev.id] || 0} inscritos</span>
                   </div>
                   <div style={styles.cardActions}>
                     <button onClick={() => handleIniciarEdicao(ev)} style={styles.btnEdit} className="btn-action"><Edit2 size={13}/> Editar</button>
